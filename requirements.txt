@@ -1,0 +1,7 @@
+fastapi
+uvicorn[standard] # Servidor ASGI para rodar FastAPI
+requests
+SQLAlchemy
+psycopg2-binary   # Driver PostgreSQL (use psycopg2 se precisar compilar)
+python-dotenv     # Para carregar variáveis de ambiente do .env
+pydantic[dotenv]  # Pydantic já vem com FastAPI, mas explicitamos p/ .env
