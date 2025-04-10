@@ -50,7 +50,7 @@ Siga estes passos para configurar o projeto localmente:
 
 1.  **Clone o Repositório:**
     ```bash
-    git clone <URL_DO_SEU_REPOSITORIO_GITHUB>
+    git clone https://github.com/GuilhermeLeandro/gntech-challenge.git
     cd gntech-challenge # Ou o nome que você deu ao diretório
     ```
 
