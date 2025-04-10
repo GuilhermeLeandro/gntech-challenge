@@ -1,0 +1,61 @@
+version: '3.8' # Especifica a versão do formato do Compose
+
+services:
+  # Serviço para o Banco de Dados PostgreSQL
+  db:
+    image: postgres:15 # Usar uma imagem oficial do PostgreSQL (versão 15 ou outra estável)
+    container_name: gntech_postgres_db # Nome do container (opcional, mas útil)
+    environment:
+      # Estas variáveis são lidas pela imagem do Postgres para configurar o banco na primeira inicialização
+      # O Docker Compose vai tentar ler os valores dessas variáveis do arquivo .env na mesma pasta
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    ports:
+      # Mapeia a porta 5432 do seu computador (host) para a porta 5432 do container db
+      # Permite conectar ao banco de dados de fora do Docker usando ferramentas como DBeaver/pgAdmin
+      # Cuidado: Se você já tiver o Postgres rodando localmente na porta 5432, haverá conflito.
+      # Nesse caso, mude a porta do host (ex: "5433:5432") ou pare seu Postgres local.
+      - "5432:5432"
+    volumes:
+      # Cria um volume nomeado 'postgres_data' e o monta dentro do container no local
+      # onde o Postgres guarda seus dados. Isso garante que os dados persistam
+      # mesmo se o container for parado/removido.
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      # Conecta este serviço à rede customizada definida abaixo
+      - gntech_network
+    # Opcional: Define política de reinicialização
+    # restart: unless-stopped
+
+  # Serviço para a sua API FastAPI
+  api:
+    build: . # Instrui o Compose a construir a imagem usando o Dockerfile no diretório atual (.)
+    container_name: gntech_fastapi_api # Nome do container
+    depends_on:
+      - db # Garante que o container 'db' seja iniciado ANTES do container 'api'
+    ports:
+      # Mapeia a porta 8000 do seu computador (host) para a porta 8000 exposta pelo container 'api'
+      - "8000:8000"
+    environment:
+      # Passa variáveis de ambiente para sua aplicação FastAPI dentro do container
+      # Elas também serão lidas do arquivo .env
+      DATABASE_URL: ${DATABASE_URL}
+      OPENWEATHER_API_KEY: ${OPENWEATHER_API_KEY}
+    # Alternativa/Complemento ao 'environment': Carrega todas as variáveis do .env diretamente
+    env_file:
+       - .env
+    networks:
+      # Conecta este serviço à mesma rede customizada
+      - gntech_network
+    # Opcional: Define política de reinicialização
+    # restart: unless-stopped
+
+# Define os volumes nomeados usados pelos serviços
+volumes:
+  postgres_data: # O nome do volume (pode ser qualquer nome)
+
+# Define as redes customizadas usadas pelos serviços
+networks:
+  gntech_network: # O nome da rede
+    driver: bridge # Usa o driver de rede padrão 'bridge'
